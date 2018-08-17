@@ -88,19 +88,12 @@ class AddIssuerViewController: UIViewController, ManagedIssuerDelegate {
     @IBAction func addIssuerTapped(_ sender: Any) {
         Logger.main.info("Save issuer tapped")
         
-        // TODO: validation.
-        
         if !isNetworkReachable() {
             let alert = AlertViewController.createWarning(title: NSLocalizedString("No Network Connection", comment: "No network connection alert title"),
                                                           message: NSLocalizedString("Please check your network connection and try again.", comment: "No network connection alert message"))
             present(alert, animated: false, completion: nil)
             return
         }
-
-        let progressAlert = AlertViewController.createProgress(title: NSLocalizedString("Adding Issuer", comment: "Title when adding issuer in progress"))
-        present(progressAlert, animated: false, completion: nil)
-        
-        self.progressAlert = progressAlert
         
         saveDataIntoFields()
         
@@ -159,6 +152,10 @@ class AddIssuerViewController: UIViewController, ManagedIssuerDelegate {
     
     func identifyAndIntroduceIssuer(at url: URL) {
         Logger.main.info("Starting process to identify and introduce issuer at \(url)")
+        
+        let progressAlert = AlertViewController.createProgress(title: NSLocalizedString("Adding Issuer", comment: "Title when adding issuer in progress"))
+        present(progressAlert, animated: false, completion: nil)
+        self.progressAlert = progressAlert
         
         cancelWebLogin()
         
