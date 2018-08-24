@@ -350,7 +350,9 @@ class AddIssuerViewController: UIViewController, ManagedIssuerDelegate {
         webViewNavigationController = navigationController
         
         OperationQueue.main.addOperation {
-            self.present(navigationController, animated: true, completion: nil)
+            self.progressAlert?.dismiss(animated: false, completion: {
+                self.present(navigationController, animated: true, completion: nil)
+            })
         }
     }
     
