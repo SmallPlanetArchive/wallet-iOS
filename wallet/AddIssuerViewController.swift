@@ -234,10 +234,13 @@ class AddIssuerViewController: UIViewController, ManagedIssuerDelegate {
     }
     
     func notifyAndDismiss(managedIssuer: ManagedIssuer) {
-        guard let progressAlert = progressAlert else { return }
         delegate?.added(managedIssuer: managedIssuer)
         
         DispatchQueue.main.async { [weak self] in
+            
+            guard let progressAlert = self?.progressAlert else {
+                return
+            }
             
             let title = NSLocalizedString("Success!", comment: "Add issuers alert title")
             let message = NSLocalizedString("An issuer was added. Please check your issuers screen.", comment: "Add issuer alert message")
@@ -259,7 +262,10 @@ class AddIssuerViewController: UIViewController, ManagedIssuerDelegate {
                 }
             }
             progressAlert.set(buttons: [okayButton])
-
+            
+            if self?.presentedViewController != progressAlert {
+                self?.present(progressAlert, animated: false, completion: nil)
+            }
             self?.isLoading = false
         }
     }
