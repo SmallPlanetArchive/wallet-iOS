@@ -73,25 +73,35 @@ class CertificateVerifier: NSObject, WKScriptMessageHandler {
         case VerifierMessageType.blockchain:
             blockchain = message.body as? String
             let message = Localizations.VerificationInProgress(blockchain!)
+            
+            NSLog("VerifierMessageType.blockchain: --message: \(message)")
+            
             delegate?.updateStatus(message: message, status: .verifying)
             
         case VerifierMessageType.allSteps:
             let topArray = message.body as! [[String: Any?]]
             var allSteps: [VerificationStep] = []
             for step in topArray {
+                NSLog("VerifierMessageType.allSteps : --step: \(step.debugDescription)")
                 allSteps.append(VerificationStep(rawObject: step))
             }
+            
             delegate?.notifySteps(steps: allSteps)
             
         case VerifierMessageType.substepUpdate:
             let message = message.body as! [String: Any?]
             let substep = VerificationSubstep(rawObject: message)
+        
+            NSLog("VerifierMessageType.substepUpdate : --step: \(substep.debugDescription)")
+            
             delegate?.updateSubstepStatus(substep: substep)
             
         case VerifierMessageType.result:
             let message = message.body as! [String: String]
             let status = message["status"]!
             let success = (status == VerificationStatus.success.rawValue)
+            
+            NSLog("VerifierMessageType.result: --step: \(message) ... status: \(status) ... success: \(success)")
             
             if success {
                 delegate?.updateStatus(message: Localizations.VerificationSuccess(blockchain!), status: .success)
@@ -119,7 +129,7 @@ enum VerificationStatus: String {
     case verifying = "starting"
 }
 
-class VerificationStep {
+class VerificationStep : CustomDebugStringConvertible {
     var code: String!
     var label: String?
     var substeps: [VerificationSubstep] = []
@@ -133,9 +143,20 @@ class VerificationStep {
             substeps.append(VerificationSubstep(rawObject: step))
         }
     }
+    
+    public var debugDescription : String {
+        
+        var finalString = "VerificationStep(code: \(code), label: \(label ?? "")"
+        
+        substeps.forEach() {
+            finalString = finalString + "\n" + $0.debugDescription
+        }
+
+        return finalString
+    }
 }
 
-class VerificationSubstep {
+class VerificationSubstep : CustomDebugStringConvertible {
     var code: String!
     var label: String?
     var parentStep: String?
@@ -152,6 +173,10 @@ class VerificationSubstep {
             status = VerificationStatus(rawValue: rawStatus)
         }
     }
+    
+    public var debugDescription : String {
+        return "VerificationSubstep(code: \(code), label: \(label ?? ""), parentStep: \(parentStep ?? "") , errorMessage: \(errorMessage ?? "") , status: \(status))"
+    }
 }
 
 protocol CertificateVerifierDelegate: class {
@@ -159,4 +184,3 @@ protocol CertificateVerifierDelegate: class {
     func notifySteps(steps: [VerificationStep])
     func updateSubstepStatus(substep: VerificationSubstep)
 }
-
