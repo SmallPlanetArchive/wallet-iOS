@@ -31,6 +31,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         #if DEBUG
         Bugsee.launch(token :"ef62e737-3645-43fa-ba0b-062afb7743af")
+//        Bugsee.stop {}
         #endif
         
         let configuration = ArgumentParser().parse(arguments: ProcessInfo.processInfo.arguments)
@@ -135,7 +136,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     func importState(from url: URL) -> Bool {
         guard let fragment = url.fragment else {
-            return false
+            let encodedCertificateURL = url.absoluteString
+            if encodedCertificateURL.count > 10, let decodedCertificateString = encodedCertificateURL.removingPercentEncoding,
+                let certificateURL = URL(string: decodedCertificateString) {
+                DispatchQueue.main.async {
+                    self.launchAddCertificate(at: certificateURL, showCertificate: true, animated: false)
+                }
+                return true
+            } else {
+                return false
+            }
         }
         
         var pathComponents = fragment.components(separatedBy: "/")
